@@ -8,6 +8,7 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXTAUTH_URL || "https://bio-affiliate.vercel.app"),
   title: "PHU | Affiliate",
   description: "Sản phẩm yêu thích được tuyển chọn bởi PHU",
   icons: {
