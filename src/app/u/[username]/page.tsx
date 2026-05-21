@@ -20,6 +20,7 @@ export async function generateMetadata({
   const settings = await SiteSettings.findOne({ userId: user._id });
   const name = settings?.displayName || username;
   const bio = settings?.bio || "Trang affiliate cá nhân";
+  const avatar = settings?.avatar || "";
 
   return {
     title: `${name} | Bio`,
@@ -28,6 +29,13 @@ export async function generateMetadata({
       title: `${name} | Bio`,
       description: bio,
       type: "profile",
+      ...(avatar && { images: [{ url: avatar, width: 400, height: 400, alt: name }] }),
+    },
+    twitter: {
+      card: avatar ? "summary" : "summary",
+      title: `${name} | Bio`,
+      description: bio,
+      ...(avatar && { images: [avatar] }),
     },
   };
 }
