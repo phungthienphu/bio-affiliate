@@ -1,6 +1,8 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
+import dbConnect from "./mongodb";
+import User from "@/models/user";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -16,21 +18,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (!email || !password) return null;
 
-        const adminEmail = process.env.ADMIN_EMAIL;
-        const adminPassword = process.env.ADMIN_PASSWORD;
+        await dbConnect();
+        const user = await User.findOne({ email: email.toLowerCase() });
+        if (!user || user.status === "suspended") return null;
 
-        if (!adminEmail || !adminPassword) return null;
-
-        if (email !== adminEmail) return null;
-
-        // First login: compare plain text. In production, hash the password.
-        const isValid =
-          password === adminPassword ||
-          (await bcrypt.compare(password, adminPassword));
-
+        const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) return null;
 
-        return { id: "admin", email: adminEmail, name: "Admin" };
+        return {
+          id: user._id.toString(),
+          email: user.email,
+          name: user.username,
+          role: user.role,
+          username: user.username,
+        };
       },
     }),
   ],
@@ -39,5 +40,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   session: {
     strategy: "jwt",
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id ?? "";
+        token.role = ((user as { role?: string }).role ?? "user") as "user" | "admin";
+        token.username = (user as { username?: string }).username ?? "";
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (token) {
+        session.user.id = (token.id ?? "") as string;
+        session.user.role = (token.role ?? "user") as "user" | "admin";
+        session.user.username = (token.username ?? "") as string;
+      }
+      return session;
+    },
   },
 });

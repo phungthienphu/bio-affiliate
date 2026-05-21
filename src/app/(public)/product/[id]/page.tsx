@@ -35,22 +35,28 @@ export default async function ProductDetailPage({
   const { id } = await params;
   await dbConnect();
 
-  const [product, settings, relatedProducts] = await Promise.all([
-    Product.findById(id),
-    SiteSettings.findOne(),
-    Product.find({ isActive: true, _id: { $ne: id } })
+  const product = await Product.findById(id);
+  if (!product || !product.isActive) notFound();
+
+  const [settingsDoc, relatedProducts] = await Promise.all([
+    SiteSettings.findOne({ userId: product.userId }),
+    Product.find({ userId: product.userId, isActive: true, _id: { $ne: id } })
       .sort({ createdAt: -1 })
       .limit(4),
   ]);
 
-  if (!product || !product.isActive) notFound();
-
-  const siteSettings = settings || (await SiteSettings.create({}));
+  const settings = settingsDoc || {
+    displayName: "",
+    bio: "",
+    avatar: "",
+    themeId: "rose",
+    socialLinks: { facebook: "", tiktok: "", instagram: "", youtube: "", zalo: "" },
+  };
 
   return (
     <ProductDetailClient
       product={JSON.parse(JSON.stringify(product))}
-      settings={JSON.parse(JSON.stringify(siteSettings))}
+      settings={JSON.parse(JSON.stringify(settings))}
       relatedProducts={JSON.parse(JSON.stringify(relatedProducts))}
     />
   );

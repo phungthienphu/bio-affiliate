@@ -1,38 +1,48 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button, Input } from "@/components/ui";
-import { Suspense } from "react";
 
-function LoginForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+export default function RegisterPage() {
+  const [form, setForm] = useState({ email: "", username: "", password: "", confirm: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const justRegistered = searchParams.get("registered") === "1";
+
+  const update = (key: keyof typeof form, value: string) =>
+    setForm((prev) => ({ ...prev, [key]: value }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
 
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
+    if (form.password !== form.confirm) {
+      setError("Mật khẩu xác nhận không khớp");
+      return;
+    }
+
+    setLoading(true);
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: form.email,
+        username: form.username,
+        password: form.password,
+      }),
     });
 
-    if (result?.error) {
-      setError("Email hoặc mật khẩu không đúng");
-      setLoading(false);
-    } else {
-      router.push("/dashboard");
+    const data = await res.json();
+    setLoading(false);
+
+    if (!res.ok) {
+      setError(data.error || "Đăng ký thất bại");
+      return;
     }
+
+    router.push("/login?registered=1");
   };
 
   return (
@@ -57,7 +67,7 @@ function LoginForm() {
 
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
-          className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-125 h-125 rounded-full opacity-[0.06] blur-3xl"
+          className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full opacity-[0.06] blur-3xl"
           style={{ background: "var(--color-gradient)" }}
         />
       </div>
@@ -74,44 +84,50 @@ function LoginForm() {
             className="w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
             style={{ background: "var(--color-gradient)" }}
           >
-            <svg
-              className="w-6 h-6 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-              />
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </div>
           <h1 className="text-xl font-bold" style={{ color: "var(--color-text)" }}>
-            Đăng nhập
+            Tạo tài khoản
           </h1>
+          <p className="text-sm mt-1" style={{ color: "var(--color-text-muted)" }}>
+            Xây dựng trang bio affiliate của bạn
+          </p>
         </div>
-
-        {justRegistered && (
-          <div className="mb-4 p-3 rounded-xl text-sm text-center text-emerald-700 bg-emerald-50 animate-fadeIn">
-            Đăng ký thành công! Hãy đăng nhập.
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
             label="Email"
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={form.email}
+            onChange={(e) => update("email", e.target.value)}
             required
           />
+          <div>
+            <Input
+              label="Username"
+              value={form.username}
+              onChange={(e) => update("username", e.target.value.toLowerCase())}
+              placeholder="vd: nguyenvana"
+              required
+            />
+            <p className="text-xs mt-1" style={{ color: "var(--color-text-muted)" }}>
+              Trang bio của bạn: /u/{form.username || "username"}
+            </p>
+          </div>
           <Input
             label="Mật khẩu"
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={form.password}
+            onChange={(e) => update("password", e.target.value)}
+            required
+          />
+          <Input
+            label="Xác nhận mật khẩu"
+            type="password"
+            value={form.confirm}
+            onChange={(e) => update("confirm", e.target.value)}
             required
           />
 
@@ -120,29 +136,21 @@ function LoginForm() {
           )}
 
           <Button type="submit" loading={loading} fullWidth size="lg">
-            Đăng nhập
+            Đăng ký
           </Button>
         </form>
 
         <p className="text-center text-sm mt-6" style={{ color: "var(--color-text-muted)" }}>
-          Chưa có tài khoản?{" "}
+          Đã có tài khoản?{" "}
           <Link
-            href="/register"
+            href="/login"
             className="font-medium"
             style={{ color: "var(--color-primary)" }}
           >
-            Đăng ký ngay
+            Đăng nhập
           </Link>
         </p>
       </div>
     </div>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense>
-      <LoginForm />
-    </Suspense>
   );
 }

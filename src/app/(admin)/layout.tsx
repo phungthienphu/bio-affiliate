@@ -18,7 +18,10 @@ export default async function AdminLayout({
       className="min-h-screen"
       style={{ backgroundColor: "var(--color-background)" }}
     >
-      <AdminNav />
+      <AdminNav
+        role={session.user.role}
+        username={session.user.username}
+      />
       <main className="max-w-6xl mx-auto px-4 py-8">{children}</main>
     </div>
   );

@@ -33,6 +33,9 @@ function applyThemeToDOM(theme: Theme) {
   root.style.setProperty("--color-border", c.border);
   root.style.setProperty("--color-gradient", c.gradient);
   root.style.setProperty("--color-gradient-text", c.gradientText);
+  root.style.setProperty("--shadow-card", c.shadowCard);
+  root.style.setProperty("--shadow-md", c.shadowMd);
+  root.style.setProperty("--shadow-lg", c.shadowLg);
 }
 
 export default function ThemeProvider({

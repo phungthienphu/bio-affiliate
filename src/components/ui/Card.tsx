@@ -13,10 +13,14 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={`
-          bg-[var(--color-surface)] rounded-2xl
-          border border-[var(--color-border)]
-          ${hover ? "hover:shadow-lg hover:border-[var(--color-primary)]/20 transition-all duration-300" : ""}
-          ${padding ? "p-6" : ""}
+          rounded-2xl border
+          bg-[var(--color-surface)]
+          border-[var(--color-border)]
+          t-shadow
+          ${hover
+            ? "cursor-pointer transition-all duration-300 hover:-translate-y-0.5 hover:t-shadow-md hover:border-[color-mix(in_srgb,var(--color-primary)_20%,var(--color-border))]"
+            : ""}
+          ${padding ? "p-5 sm:p-6" : ""}
           ${className}
         `}
         {...props}

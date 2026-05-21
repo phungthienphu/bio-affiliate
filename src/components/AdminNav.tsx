@@ -11,9 +11,19 @@ const NAV_ITEMS = [
   { href: "/settings", label: "Cài đặt" },
 ];
 
-export default function AdminNav() {
+interface AdminNavProps {
+  role?: "user" | "admin";
+  username?: string;
+}
+
+export default function AdminNav({ role, username }: AdminNavProps) {
   const pathname = usePathname();
   const [showLogout, setShowLogout] = useState(false);
+  const isAdmin = role === "admin";
+
+  const allNavItems = isAdmin
+    ? [...NAV_ITEMS, { href: "/admin", label: "Users" }]
+    : NAV_ITEMS;
 
   return (
     <>
@@ -34,7 +44,7 @@ export default function AdminNav() {
               Admin
             </Link>
 
-            {NAV_ITEMS.map((item) => {
+            {allNavItems.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
@@ -57,17 +67,19 @@ export default function AdminNav() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              target="_blank"
-              className="text-xs px-3 py-1.5 rounded-lg transition-colors"
-              style={{
-                color: "var(--color-text-muted)",
-                backgroundColor: "var(--color-surface-hover)",
-              }}
-            >
-              Xem trang
-            </Link>
+            {username && (
+              <Link
+                href={`/u/${username}`}
+                target="_blank"
+                className="text-xs px-3 py-1.5 rounded-lg transition-colors"
+                style={{
+                  color: "var(--color-text-muted)",
+                  backgroundColor: "var(--color-surface-hover)",
+                }}
+              >
+                Xem bio
+              </Link>
+            )}
             <button
               onClick={() => setShowLogout(true)}
               className="text-xs cursor-pointer hover:text-red-500 transition-colors"
@@ -79,7 +91,6 @@ export default function AdminNav() {
         </div>
       </nav>
 
-      {/* Logout Confirmation Modal */}
       <Modal open={showLogout} onClose={() => setShowLogout(false)} size="sm">
         <div className="text-center space-y-4">
           <div
@@ -102,24 +113,15 @@ export default function AdminNav() {
             </svg>
           </div>
           <div>
-            <h3
-              className="text-lg font-semibold"
-              style={{ color: "var(--color-text)" }}
-            >
+            <h3 className="text-lg font-semibold" style={{ color: "var(--color-text)" }}>
               Xác nhận đăng xuất
             </h3>
-            <p
-              className="text-sm mt-1"
-              style={{ color: "var(--color-text-muted)" }}
-            >
+            <p className="text-sm mt-1" style={{ color: "var(--color-text-muted)" }}>
               Bạn có chắc chắn muốn đăng xuất không?
             </p>
           </div>
           <div className="flex gap-3 justify-center pt-2">
-            <Button
-              variant="danger"
-              onClick={() => signOut({ callbackUrl: "/login" })}
-            >
+            <Button variant="danger" onClick={() => signOut({ callbackUrl: "/login" })}>
               Đăng xuất
             </Button>
             <Button variant="secondary" onClick={() => setShowLogout(false)}>

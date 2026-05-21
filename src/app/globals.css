@@ -4,21 +4,26 @@
   --font-sans: var(--font-geist-sans);
 }
 
-/* Default theme variables (Rose) */
+/* ===== Default theme (Rose) — overridden per-user by ThemeProvider ===== */
 :root {
   --color-primary: #e11d48;
   --color-primary-hover: #be123c;
   --color-secondary: #f43f5e;
   --color-accent: #fb7185;
-  --color-background: #fafafa;
+  --color-background: #f7f8fa;
   --color-surface: #ffffff;
   --color-surface-hover: #fff1f2;
   --color-text: #0f172a;
   --color-text-secondary: #475569;
   --color-text-muted: #94a3b8;
-  --color-border: #f1f5f9;
+  --color-border: #e4e9f0;
   --color-gradient: linear-gradient(135deg, #e11d48, #f97316);
   --color-gradient-text: linear-gradient(135deg, #e11d48, #f97316);
+  --shadow-sm:   0 1px 2px rgba(0,0,0,0.05);
+  --shadow-card: 0 1px 4px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-md:   0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.05);
+  --shadow-lg:   0 8px 32px rgba(0,0,0,0.10), 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-xl:   0 20px 60px rgba(0,0,0,0.14), 0 8px 20px rgba(0,0,0,0.08);
 }
 
 /* ===== Theme utility classes ===== */
@@ -42,40 +47,66 @@
   color: transparent;
 }
 
-/* Category/filter pill */
+/* Shadow utilities */
+.t-shadow-sm   { box-shadow: var(--shadow-sm); }
+.t-shadow      { box-shadow: var(--shadow-card); }
+.t-shadow-md   { box-shadow: var(--shadow-md); }
+.t-shadow-lg   { box-shadow: var(--shadow-lg); }
+.t-shadow-xl   { box-shadow: var(--shadow-xl); }
+
+/* Glassmorphism */
+.glass {
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+.glass-light {
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  background: color-mix(in srgb, var(--color-surface) 82%, transparent);
+}
+
+/* ===== Filter pill ===== */
 .t-pill {
-  padding: 0.375rem 0.75rem;
-  border-radius: 0.5rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 0.6rem;
   font-size: 0.75rem;
   font-weight: 500;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
+  border: 1px solid transparent;
 }
 .t-pill-active {
   background-color: var(--color-primary);
   color: #ffffff;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-primary) 35%, transparent);
 }
 .t-pill-inactive {
-  background-color: var(--color-surface-hover);
+  background-color: var(--color-surface);
   color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+.t-pill-inactive:hover {
+  color: var(--color-text);
+  border-color: color-mix(in srgb, var(--color-primary) 40%, var(--color-border));
 }
 
-/* Tag chip (removable) */
+/* Tag chip */
 .t-tag {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  padding: 0.25rem 0.625rem;
+  padding: 0.25rem 0.75rem;
   border-radius: 9999px;
   font-size: 0.75rem;
   font-weight: 500;
   background-color: var(--color-surface-hover);
   color: var(--color-primary);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 25%, transparent);
 }
 
 /* ===== Animations ===== */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes slideUp {
@@ -83,25 +114,48 @@
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.95); }
+  from { opacity: 0; transform: scale(0.94); }
   to   { opacity: 1; transform: scale(1); }
 }
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 40%, transparent); }
+  70%  { box-shadow: 0 0 0 10px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
 
-.animate-fadeIn  { animation: fadeIn 0.5s ease-out both; }
-.animate-slideUp { animation: slideUp 0.4s ease-out both; }
-.animate-scaleIn { animation: scaleIn 0.3s ease-out both; }
+.animate-fadeIn  { animation: fadeIn  0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-slideUp { animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-scaleIn { animation: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-float   { animation: float 3s ease-in-out infinite; }
 
 /* ===== Scrollbar ===== */
 html { scroll-behavior: smooth; }
 
-::-webkit-scrollbar       { width: 5px; }
+::-webkit-scrollbar       { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--color-text-muted); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-text-secondary); }
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
 
-/* Focus visible */
+/* Focus ring */
 :focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: 6px;
+}
+
+/* Text selection */
+::selection {
+  background: color-mix(in srgb, var(--color-primary) 18%, transparent);
 }

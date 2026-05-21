@@ -10,7 +10,7 @@ interface SocialLinksProps {
   };
 }
 
-const socialIcons: Record<string, { label: string; path: string; viewBox?: string }> = {
+const socialConfig: Record<string, { label: string; path: string; viewBox?: string }> = {
   facebook: {
     label: "Facebook",
     path: "M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z",
@@ -36,33 +36,48 @@ const socialIcons: Record<string, { label: string; path: string; viewBox?: strin
 
 export default function SocialLinks({ links }: SocialLinksProps) {
   const activeLinks = Object.entries(links).filter(([, url]) => url);
-
   if (activeLinks.length === 0) return null;
 
   return (
-    <div className="flex justify-center gap-3">
+    <div className="flex justify-center items-center gap-2.5">
       {activeLinks.map(([key, url]) => {
-        const icon = socialIcons[key];
-        if (!icon) return null;
+        const cfg = socialConfig[key];
+        if (!cfg) return null;
         return (
           <a
             key={key}
             href={url}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-10 h-10 rounded-full flex items-center justify-center
-              text-[var(--color-text-muted)] hover:text-[var(--color-primary)]
-              bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)]
-              border border-[var(--color-border)]
-              transition-all duration-300 hover:scale-110"
-            aria-label={icon.label}
+            aria-label={cfg.label}
+            className="group relative w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110 hover:-translate-y-0.5"
+            style={{
+              backgroundColor: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
+              boxShadow: "var(--shadow-card)",
+              color: "var(--color-text-muted)",
+            }}
+            onMouseEnter={(e) => {
+              const el = e.currentTarget as HTMLElement;
+              el.style.color = "var(--color-primary)";
+              el.style.borderColor = "color-mix(in srgb, var(--color-primary) 35%, transparent)";
+              el.style.backgroundColor = "color-mix(in srgb, var(--color-primary) 8%, var(--color-surface))";
+              el.style.boxShadow = "var(--shadow-md)";
+            }}
+            onMouseLeave={(e) => {
+              const el = e.currentTarget as HTMLElement;
+              el.style.color = "var(--color-text-muted)";
+              el.style.borderColor = "var(--color-border)";
+              el.style.backgroundColor = "var(--color-surface)";
+              el.style.boxShadow = "var(--shadow-card)";
+            }}
           >
             <svg
-              className="w-4.5 h-4.5"
+              className="w-4 h-4"
               fill="currentColor"
-              viewBox={icon.viewBox || "0 0 24 24"}
+              viewBox={cfg.viewBox || "0 0 24 24"}
             >
-              <path d={icon.path} />
+              <path d={cfg.path} />
             </svg>
           </a>
         );

@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
 export interface ISiteSettings extends Document {
+  userId: mongoose.Types.ObjectId;
   displayName: string;
   bio: string;
   avatar: string;
@@ -18,6 +19,7 @@ export interface ISiteSettings extends Document {
 
 const SiteSettingsSchema = new Schema<ISiteSettings>(
   {
+    userId: { type: Schema.Types.ObjectId, ref: "User", required: true, unique: true },
     displayName: { type: String, default: "Your Name" },
     bio: { type: String, default: "Chia sẻ những sản phẩm tốt nhất" },
     avatar: { type: String, default: "" },

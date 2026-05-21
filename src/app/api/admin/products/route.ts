@@ -3,7 +3,7 @@ import dbConnect from "@/lib/mongodb";
 import Product from "@/models/product";
 import { auth } from "@/lib/auth";
 
-// GET: Lấy TẤT CẢ sản phẩm (admin only - bao gồm cả inactive)
+// GET: Lấy TẤT CẢ sản phẩm của user hiện tại (bao gồm cả inactive)
 export async function GET() {
   const session = await auth();
   if (!session) {
@@ -11,6 +11,9 @@ export async function GET() {
   }
 
   await dbConnect();
-  const products = await Product.find().sort({ order: 1, createdAt: -1 });
+  const products = await Product.find({ userId: session.user.id }).sort({
+    order: 1,
+    createdAt: -1,
+  });
   return NextResponse.json(products);
 }

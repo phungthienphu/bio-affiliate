@@ -13,10 +13,12 @@ interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
 }
 
 const baseInputClass = `
-  w-full px-4 py-2.5 rounded-xl
-  bg-[var(--color-surface)] text-[var(--color-text)]
+  w-full px-4 py-2.5 rounded-xl text-sm
+  bg-[var(--color-background)] text-[var(--color-text)]
   border border-[var(--color-border)]
-  focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent
+  focus:bg-[var(--color-surface)]
+  focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_30%,transparent)]
+  focus:border-[var(--color-primary)]
   outline-none transition-all duration-200
   placeholder:text-[var(--color-text-muted)]
 `;
@@ -31,7 +33,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           </label>
         )}
         <input ref={ref} className={`${baseInputClass} ${className}`} {...props} />
-        {error && <p className="text-red-500 text-xs">{error}</p>}
+        {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
       </div>
     );
   }
@@ -52,7 +54,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           className={`${baseInputClass} resize-none ${className}`}
           {...props}
         />
-        {error && <p className="text-red-500 text-xs">{error}</p>}
+        {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
       </div>
     );
   }
