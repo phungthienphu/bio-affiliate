@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     role,
   });
 
-  await SiteSettings.create({ userId: user._id, displayName: username });
+  await SiteSettings.create({ userId: user._id });
 
   return NextResponse.json({ success: true }, { status: 201 });
 }

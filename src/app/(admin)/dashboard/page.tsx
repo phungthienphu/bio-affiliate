@@ -40,23 +40,15 @@ export default function DashboardPage() {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const fetchProducts = useCallback(async () => {
-    const res = await fetch("/api/admin/products");
-    const data = await res.json();
-    setProducts(data);
-  }, []);
+  const fetchProducts = useCallback(() =>
+    fetch("/api/admin/products").then((r) => r.json()).then(setProducts)
+  , [setProducts]);
 
   useEffect(() => {
-    let active = true;
     fetch("/api/admin/products")
       .then((r) => r.json())
-      .then((data) => {
-        if (active) {
-          setProducts(data);
-          setLoading(false);
-        }
-      });
-    return () => { active = false; };
+      .then(setProducts)
+      .finally(() => setLoading(false));
   }, []);
 
   const updateField = <K extends keyof typeof EMPTY_FORM>(
@@ -78,7 +70,7 @@ export default function DashboardPage() {
     setUploading(false);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setSaving(true);
     const url = editing ? `/api/products/${editing}` : "/api/products";

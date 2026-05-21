@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Button, Input, Textarea, Card, IconCamera } from "@/components/ui";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -33,28 +33,30 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [saved, setSaved] = useState(false);
-
-  const fetchSettings = useCallback(async () => {
-    const res = await fetch("/api/settings");
-    const data = await res.json();
-    setSettings(data);
-  }, []);
+  const [saveError, setSaveError] = useState("");
 
   useEffect(() => {
-    fetchSettings();
-  }, [fetchSettings]);
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then(setSettings);
+  }, []);
 
   const handleSave = async () => {
     if (!settings) return;
     setSaving(true);
-    await fetch("/api/settings", {
+    setSaveError("");
+    const res = await fetch("/api/settings", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(settings),
     });
     setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    if (res.ok) {
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } else {
+      setSaveError("Lưu thất bại, thử lại nhé");
+    }
   };
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -260,6 +262,9 @@ export default function SettingsPage() {
           <span className="text-sm animate-fadeIn text-emerald-600">
             Cập nhật thành công
           </span>
+        )}
+        {saveError && (
+          <span className="text-sm animate-fadeIn text-red-500">{saveError}</span>
         )}
       </div>
     </div>

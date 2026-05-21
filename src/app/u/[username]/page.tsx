@@ -48,12 +48,19 @@ export default async function UserBioPage({
     Product.find({ userId: user._id, isActive: true }).sort({ order: 1, createdAt: -1 }),
   ]);
 
-  const settings = settingsDoc || {
-    displayName: user.username,
-    bio: "",
-    avatar: "",
-    themeId: "rose",
-    socialLinks: { facebook: "", tiktok: "", instagram: "", youtube: "", zalo: "" },
+  const s = settingsDoc;
+  const settings = {
+    displayName: s?.displayName || user.username,
+    bio: s?.bio || "",
+    avatar: s?.avatar || "",
+    themeId: s?.themeId || "rose",
+    socialLinks: {
+      facebook: s?.socialLinks?.facebook || "",
+      tiktok: s?.socialLinks?.tiktok || "",
+      instagram: s?.socialLinks?.instagram || "",
+      youtube: s?.socialLinks?.youtube || "",
+      zalo: s?.socialLinks?.zalo || "",
+    },
   };
 
   return (

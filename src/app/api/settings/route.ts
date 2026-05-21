@@ -26,15 +26,13 @@ export async function PUT(req: NextRequest) {
   }
 
   await dbConnect();
-  const body = await req.json();
+  const { displayName, bio, avatar, themeId, socialLinks } = await req.json();
 
-  let settings = await SiteSettings.findOne({ userId: session.user.id });
-  if (!settings) {
-    settings = await SiteSettings.create({ userId: session.user.id, ...body });
-  } else {
-    Object.assign(settings, body);
-    await settings.save();
-  }
+  const settings = await SiteSettings.findOneAndUpdate(
+    { userId: session.user.id },
+    { $set: { displayName, bio, avatar, themeId, socialLinks } },
+    { new: true, upsert: true }
+  );
 
   return NextResponse.json(settings);
 }

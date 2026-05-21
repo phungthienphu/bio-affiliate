@@ -24,25 +24,15 @@ export default function AdminUsersClient({ currentUserId }: { currentUserId: str
   const [editLimit, setEditLimit] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const reload = useCallback(async () => {
-    const res = await fetch("/api/admin/users");
-    if (res.ok) {
-      const data = await res.json();
-      setUsers(data);
-    }
-  }, []);
+  const reload = useCallback(() =>
+    fetch("/api/admin/users").then((r) => r.json()).then(setUsers)
+  , [setUsers]);
 
   useEffect(() => {
-    let active = true;
     fetch("/api/admin/users")
       .then((r) => r.json())
-      .then((data) => {
-        if (active) {
-          setUsers(data);
-          setLoading(false);
-        }
-      });
-    return () => { active = false; };
+      .then(setUsers)
+      .finally(() => setLoading(false));
   }, []);
 
   const handleToggleStatus = async (user: UserWithStats) => {
