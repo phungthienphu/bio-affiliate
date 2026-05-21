@@ -44,12 +44,20 @@ export default function DashboardPage() {
     const res = await fetch("/api/admin/products");
     const data = await res.json();
     setProducts(data);
-    setLoading(false);
   }, []);
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    let active = true;
+    fetch("/api/admin/products")
+      .then((r) => r.json())
+      .then((data) => {
+        if (active) {
+          setProducts(data);
+          setLoading(false);
+        }
+      });
+    return () => { active = false; };
+  }, []);
 
   const updateField = <K extends keyof typeof EMPTY_FORM>(
     key: K,
@@ -138,13 +146,13 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3 sm:gap-4">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
         {stats.map((stat) => (
-          <Card key={stat.label}>
-            <p className="text-xs sm:text-sm t-text-muted">
+          <Card key={stat.label} className="p-3 sm:p-5">
+            <p className="text-[11px] sm:text-sm t-text-muted leading-tight">
               {stat.label}
             </p>
-            <p className="text-xl sm:text-2xl font-bold mt-1" style={{ color: stat.color }}>
+            <p className="text-lg sm:text-2xl font-bold mt-1" style={{ color: stat.color }}>
               {stat.value}
             </p>
           </Card>
@@ -291,7 +299,7 @@ export default function DashboardPage() {
                 key={product._id}
                 className={`flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3.5 transition-opacity ${
                   !product.isActive ? "opacity-40" : ""
-                } ${index < products.length - 1 ? "border-b border-[var(--color-border)]" : ""}`}
+                } ${index < products.length - 1 ? "border-b border-(--color-border)" : ""}`}
               >
                 {/* Image */}
                 <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden shrink-0">

@@ -63,13 +63,13 @@ function LoginForm() {
       </div>
 
       <div
-        className="relative max-w-sm w-full rounded-2xl shadow-xl p-8 animate-slideUp"
+        className="relative max-w-sm w-full rounded-2xl p-5 sm:p-8 animate-slideUp t-shadow-lg"
         style={{
           backgroundColor: "var(--color-surface)",
           border: "1px solid var(--color-border)",
         }}
       >
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 sm:mb-8">
           <div
             className="w-12 h-12 rounded-xl mx-auto mb-4 flex items-center justify-center"
             style={{ background: "var(--color-gradient)" }}

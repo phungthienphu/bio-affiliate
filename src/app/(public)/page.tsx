@@ -60,10 +60,10 @@ export default function HomePage() {
           backdropFilter: "blur(12px)",
         }}
       >
-        <div className="max-w-5xl mx-auto px-5 h-14 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-4 sm:px-5 h-13 sm:h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center"
+              className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
               style={{ background: "var(--color-gradient)" }}
             >
               <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,31 +71,32 @@ export default function HomePage() {
                   d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
               </svg>
             </div>
-            <span className="font-bold text-sm" style={{ color: "var(--color-text)" }}>
+            <span className="hidden sm:block font-bold text-sm" style={{ color: "var(--color-text)" }}>
               BioAffiliate
             </span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <Link
               href="/login"
-              className="px-3.5 py-1.5 text-sm font-medium rounded-lg transition-colors"
+              className="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors"
               style={{ color: "var(--color-text-secondary)" }}
             >
               Đăng nhập
             </Link>
             <Link
               href="/register"
-              className="px-4 py-1.5 text-sm font-semibold rounded-lg text-white transition-opacity hover:opacity-90"
+              className="px-3.5 sm:px-4 py-1.5 text-sm font-semibold rounded-lg text-white transition-opacity hover:opacity-90 whitespace-nowrap"
               style={{ background: "var(--color-gradient)" }}
             >
-              Đăng ký miễn phí
+              <span className="hidden sm:inline">Đăng ký miễn phí</span>
+              <span className="sm:hidden">Đăng ký</span>
             </Link>
           </div>
         </div>
       </header>
 
       {/* ── Hero ── */}
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-5 py-20 sm:py-28 text-center">
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-5 py-14 sm:py-28 text-center">
         {/* Badge */}
         <div className="animate-fadeIn mb-6">
           <span

@@ -24,18 +24,26 @@ export default function AdminUsersClient({ currentUserId }: { currentUserId: str
   const [editLimit, setEditLimit] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const fetchUsers = useCallback(async () => {
+  const reload = useCallback(async () => {
     const res = await fetch("/api/admin/users");
     if (res.ok) {
       const data = await res.json();
       setUsers(data);
     }
-    setLoading(false);
   }, []);
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    let active = true;
+    fetch("/api/admin/users")
+      .then((r) => r.json())
+      .then((data) => {
+        if (active) {
+          setUsers(data);
+          setLoading(false);
+        }
+      });
+    return () => { active = false; };
+  }, []);
 
   const handleToggleStatus = async (user: UserWithStats) => {
     const newStatus = user.status === "active" ? "suspended" : "active";
@@ -44,7 +52,7 @@ export default function AdminUsersClient({ currentUserId }: { currentUserId: str
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: newStatus }),
     });
-    fetchUsers();
+    reload();
   };
 
   const handleSaveLimit = async () => {
@@ -57,13 +65,13 @@ export default function AdminUsersClient({ currentUserId }: { currentUserId: str
     });
     setSaving(false);
     setEditingUser(null);
-    fetchUsers();
+    reload();
   };
 
   const handleDelete = async (user: UserWithStats) => {
     if (!confirm(`Xóa tài khoản @${user.username}? Toàn bộ dữ liệu sẽ bị xóa.`)) return;
     await fetch(`/api/admin/users/${user._id}`, { method: "DELETE" });
-    fetchUsers();
+    reload();
   };
 
   if (loading) return <LoadingSpinner />;
@@ -98,39 +106,71 @@ export default function AdminUsersClient({ currentUserId }: { currentUserId: str
             {users.map((user, index) => (
               <div
                 key={user._id}
-                className={`flex items-center gap-3 px-4 sm:px-5 py-4 ${
-                  index < users.length - 1 ? "border-b border-[var(--color-border)]" : ""
+                className={`px-4 sm:px-5 py-3.5 ${
+                  index < users.length - 1 ? "border-b border-(--color-border)" : ""
                 }`}
               >
-                <div
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shrink-0"
-                  style={{ background: "var(--color-gradient)" }}
-                >
-                  {user.username[0].toUpperCase()}
-                </div>
+                {/* Main row: avatar + info + desktop actions */}
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-bold shrink-0 text-sm"
+                    style={{ background: "var(--color-gradient)" }}
+                  >
+                    {user.username[0].toUpperCase()}
+                  </div>
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Link
-                      href={`/u/${user.username}`}
-                      target="_blank"
-                      className="font-medium text-sm t-text hover:underline"
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Link
+                        href={`/u/${user.username}`}
+                        target="_blank"
+                        className="font-medium text-sm t-text hover:underline"
+                      >
+                        @{user.username}
+                      </Link>
+                      {user.role === "admin" && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 font-medium">
+                          admin
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs t-text-muted truncate">{user.email}</p>
+                    <p className="text-xs t-text-muted mt-0.5">
+                      {user.productCount}/{user.productLimit} sản phẩm &middot; {user.totalClicks} clicks
+                    </p>
+                  </div>
+
+                  {/* Desktop actions */}
+                  <div className="hidden sm:flex items-center gap-2 shrink-0">
+                    <Badge
+                      variant={user.status === "active" ? "success" : "default"}
+                      onClick={() => handleToggleStatus(user)}
                     >
-                      @{user.username}
-                    </Link>
-                    {user.role === "admin" && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 font-medium">
-                        admin
-                      </span>
+                      {user.status === "active" ? "Active" : "Tạm dừng"}
+                    </Badge>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setEditingUser(user);
+                        setEditLimit(String(user.productLimit));
+                      }}
+                    >
+                      Giới hạn
+                    </Button>
+                    {user._id !== currentUserId && (
+                      <button
+                        onClick={() => handleDelete(user)}
+                        className="text-xs text-red-400 hover:text-red-600 transition-colors cursor-pointer px-2 py-1"
+                      >
+                        Xóa
+                      </button>
                     )}
                   </div>
-                  <p className="text-xs t-text-muted truncate">{user.email}</p>
-                  <p className="text-xs t-text-muted mt-0.5">
-                    {user.productCount}/{user.productLimit} sản phẩm &middot; {user.totalClicks} clicks
-                  </p>
                 </div>
 
-                <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+                {/* Mobile actions row */}
+                <div className="flex sm:hidden items-center gap-2 mt-2.5 pl-12">
                   <Badge
                     variant={user.status === "active" ? "success" : "default"}
                     onClick={() => handleToggleStatus(user)}
