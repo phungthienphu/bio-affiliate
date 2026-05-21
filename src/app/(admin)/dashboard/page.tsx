@@ -39,6 +39,34 @@ export default function DashboardPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [scrapeUrl, setScrapeUrl] = useState("");
+  const [scraping, setScraping] = useState(false);
+  const [scrapeError, setScrapeError] = useState("");
+
+  const handleScrape = async () => {
+    if (!scrapeUrl.trim()) return;
+    setScraping(true);
+    setScrapeError("");
+    const res = await fetch("/api/scrape", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: scrapeUrl.trim() }),
+    });
+    const data = await res.json();
+    setScraping(false);
+    if (!res.ok) {
+      setScrapeError(data.error || "Không thể đọc link này");
+      return;
+    }
+    setForm((prev) => ({
+      ...prev,
+      name: data.name || prev.name,
+      description: data.description || prev.description,
+      image: data.image || prev.image,
+      price: data.price || prev.price,
+      affiliateUrl: data.affiliateUrl || prev.affiliateUrl,
+    }));
+  };
 
   const fetchProducts = useCallback(() =>
     fetch("/api/admin/products").then((r) => r.json()).then(setProducts)
@@ -89,6 +117,8 @@ export default function DashboardPage() {
     setShowForm(false);
     setEditing(null);
     setSaving(false);
+    setScrapeUrl("");
+    setScrapeError("");
   };
 
   const handleEdit = (product: Product) => {
@@ -173,6 +203,53 @@ export default function DashboardPage() {
         title={editing ? "Cập nhật sản phẩm" : "Thêm sản phẩm mới"}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Auto-fill from URL — Beta */}
+          {!editing && (
+            <div
+              className="rounded-xl p-3 space-y-2"
+              style={{
+                backgroundColor: "color-mix(in srgb, var(--color-primary) 6%, transparent)",
+                border: "1px dashed color-mix(in srgb, var(--color-primary) 30%, transparent)",
+              }}
+            >
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-semibold" style={{ color: "var(--color-primary)" }}>
+                  Tự động điền từ link
+                </span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium bg-amber-100 text-amber-700">
+                  Beta
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  value={scrapeUrl}
+                  onChange={(e) => { setScrapeUrl(e.target.value); setScrapeError(""); }}
+                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleScrape())}
+                  placeholder="Dán link TikTok, Shopee, Lazada..."
+                  className="flex-1 text-sm px-3 py-2 rounded-lg outline-none border"
+                  style={{
+                    backgroundColor: "var(--color-background)",
+                    borderColor: "var(--color-border)",
+                    color: "var(--color-text)",
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={handleScrape}
+                  disabled={scraping || !scrapeUrl.trim()}
+                  className="shrink-0 px-3 py-2 rounded-lg text-sm font-medium text-white transition-opacity disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                  style={{ background: "var(--color-gradient)" }}
+                >
+                  {scraping ? "Đang đọc..." : "Điền"}
+                </button>
+              </div>
+              {scrapeError && (
+                <p className="text-xs text-red-500">{scrapeError}</p>
+              )}
+            </div>
+          )}
+
           <Input
             label="Tên sản phẩm *"
             value={form.name}
